@@ -16,23 +16,16 @@ jobs:
       with:
         node-version: '18'  # Specify the Node.js version you're using
 
-    # Step to restore the WhatsApp auth cache
-    - name: Restore WhatsApp auth cache
-      uses: actions/cache@v3
-      with:
-        path: .wwebjs_auth  # Path to the auth session
-        key: whatsapp-auth-${{ github.sha }}  # Unique cache key for auth session
-        restore-keys: |
-          whatsapp-auth-
+    # Step to restore the WhatsApp auth and session from the repo
+    - name: Restore WhatsApp auth from repo
+      run: |
+        mkdir -p .wwebjs_auth
+        cp -r auth-backup/.wwebjs_auth/* .wwebjs_auth || echo "No auth data to restore"
 
-    # Step to restore the WhatsApp session cache
-    - name: Restore WhatsApp session cache
-      uses: actions/cache@v3
-      with:
-        path: .wwebjs_cache  # Path to the session cache
-        key: whatsapp-session-${{ github.sha }}  # Unique cache key for session cache
-        restore-keys: |
-          whatsapp-session-
+    - name: Restore WhatsApp session from repo
+      run: |
+        mkdir -p .wwebjs_cache
+        cp -r auth-backup/.wwebjs_cache/* .wwebjs_cache || echo "No session data to restore"
 
     - name: Install dependencies
       run: npm install
@@ -46,21 +39,25 @@ jobs:
         GROUP_CHAT_ID: ${{ secrets.GROUP_CHAT_ID }}
         ADMIN_NUMBER: ${{ secrets.ADMIN_NUMBER }}
 
-    # Step to save the WhatsApp auth cache after the run
-    - name: Save WhatsApp auth cache
-      if: steps.cache-restore.outputs.cache-hit != 'true'
-      uses: actions/cache@v3
-      with:
-        path: .wwebjs_auth  # Path to the auth session
-        key: whatsapp-auth-${{ github.run_id }}  # Unique cache key for auth session
+    # Step to save the WhatsApp auth and session data to repo after the run
+    - name: Save WhatsApp auth and session to repo
+      run: |
+        mkdir -p auth-backup/.wwebjs_auth
+        mkdir -p auth-backup/.wwebjs_cache
+        cp -r .wwebjs_auth/* auth-backup/.wwebjs_auth
+        cp -r .wwebjs_cache/* auth-backup/.wwebjs_cache
 
-    # Step to save the WhatsApp session cache after the run
-    - name: Save WhatsApp session cache
-      if: steps.cache-restore.outputs.cache-hit != 'true'
-      uses: actions/cache@v3
-      with:
-        path: .wwebjs_cache  # Path to the session cache
-        key: whatsapp-session-${{ github.run_id }}  # Unique cache key for session cache
+    # Commit the changes and push to the repository
+    - name: Commit and Push updated auth and session data
+      run: |
+        git config --local user.email "osafinney21@gmail.com"
+        git config --local user.name "GitHub Actions Bot"
+        git add auth-backup/.wwebjs_auth auth-backup/.wwebjs_cache
+        git commit -m "Update WhatsApp auth and session data"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Check auth cache directory
       run: ls -la .wwebjs_auth || echo "No .wwebjs_auth found"
 
