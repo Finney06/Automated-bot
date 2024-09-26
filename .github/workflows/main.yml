@@ -48,6 +48,7 @@ jobs:
 
     # Step to save the WhatsApp auth cache after the run
     - name: Save WhatsApp auth cache
+      if: steps.cache-restore.outputs.cache-hit != 'true'
       uses: actions/cache@v3
       with:
         path: .wwebjs_auth  # Path to the auth session
@@ -55,6 +56,7 @@ jobs:
 
     # Step to save the WhatsApp session cache after the run
     - name: Save WhatsApp session cache
+      if: steps.cache-restore.outputs.cache-hit != 'true'
       uses: actions/cache@v3
       with:
         path: .wwebjs_cache  # Path to the session cache
