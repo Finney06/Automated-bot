@@ -8,7 +8,7 @@ client.on('qr', (qr) => {
 client.on('ready', () => {
     console.log('Client is ready!');
 
-    const recipient = '1234567890@c.us'; // Replace with actual number
+    const recipient = '23490256567890@c.us'; // Replace with actual number
     const message = 'Hello from the bot!';
 
     client.sendMessage(recipient, message).then((response) => {
