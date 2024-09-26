@@ -108,7 +108,8 @@ async function sendBirthdayMessages() {
 
                 // Personalized message for the group
                 const groupMessage = `${randomMessage} Happy Birthday @${user.whatsappNumber}! 🎉🎂`;
-                // console.log(groupMessage)
+                console.log(`Sending group message: ${groupMessage} to ${groupNumber}`);
+
 
 
                 if (picture) {
